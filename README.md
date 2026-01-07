@@ -146,7 +146,24 @@ This will:
 
 # Batch fix all manual-review issues
 > Use bug-fixer agent to fix all issues labeled needs-manual-review
+
+# Override by specific labels (performance, code-quality, etc.)
+> bugfix performance,documentation,testing
+
+# Override multiple categories
+> bugfix performance,accessibility,database
 ```
+
+**Available labels for override**:
+- `performance` - N+1 queries, bundle size, memory leaks
+- `code-quality` - Complexity, duplication, deep nesting
+- `testing` - Low coverage, flaky tests, slow tests
+- `accessibility` - Missing alt text, ARIA labels, contrast
+- `documentation` - Missing JSDoc, TODO/FIXME, outdated docs
+- `best-practices` - console.log, hardcoded URLs, error handling
+- `dependencies` - Outdated packages, unused deps
+- `database` - Missing indexes, N+1 queries, FK constraints
+- `configuration` - Env vars, debug mode, CORS
 
 ### Check Status
 
