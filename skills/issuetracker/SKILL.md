@@ -19,7 +19,7 @@ description: Complete workflow for detecting, reviewing, and fixing bugs across 
    Task tool with:
    - subagent_type: "general-purpose"
    - description: "Scan for bugs and create issues"
-   - prompt: "Use the bug-detector agent to scan for all errors in this project and create GitHub issues for each error found. Report how many issues were created."
+   - prompt: "THINK HARDER: Use the bug-detector agent to deeply analyze and scan for all errors in this project. Take time to thoroughly investigate code patterns, logical errors, performance issues, and subtle bugs that simple scanning might miss. Create GitHub issues for each error found. Report how many issues were created."
    ```
 
 2. **After bug-detector completes**, check the output:
