@@ -7,14 +7,19 @@ description: Complete workflow for detecting, reviewing, and fixing bugs across 
 
 ## INSTRUCTIONS: When this skill is invoked
 
-### If invoked with `/issuetracker scan`:
+**Command Format:**
+- `/issuetracker` or `/issuetracker scan` - Full scan workflow
+- `/issuetracker fix <number>` - Fix specific issue
+- `/issuetracker status` - Show workflow status
+
+### Default behavior (no args) or `scan` arg:
 
 1. **Immediately** use the Task tool to invoke the bug-detector agent:
    ```
    Task tool with:
    - subagent_type: "general-purpose"
    - description: "Scan for bugs and create issues"
-   - prompt: "Use the bug-detector agent to scan for all errors (build, lint, type, security) in this project and create GitHub issues for each error found. Report how many issues were created."
+   - prompt: "Use the bug-detector agent to scan for all errors in this project and create GitHub issues for each error found. Report how many issues were created."
    ```
 
 2. **After bug-detector completes**, check the output:
@@ -67,7 +72,7 @@ description: Complete workflow for detecting, reviewing, and fixing bugs across 
    🔗 View PRs: https://github.com/{org}/{repo}/pulls?q=is:pr+label:auto-fix
    ```
 
-### If invoked with `/issuetracker fix <issue-number>`:
+### If invoked with `fix` arg and issue number:
 
 1. **Extract issue number** from the command
 
@@ -105,7 +110,7 @@ description: Complete workflow for detecting, reviewing, and fixing bugs across 
    🔗 View PR: {pr-url}
    ```
 
-### If invoked with `/issuetracker status`:
+### If invoked with `status` arg:
 
 1. **Immediately** run these bash commands to get status:
    ```bash
@@ -130,12 +135,26 @@ description: Complete workflow for detecting, reviewing, and fixing bugs across 
 
 ## IMPORTANT NOTES
 
+- **Skill arguments**: Parse any text after skill name as command (scan, fix, status)
 - **Always use the Task tool** to invoke agents (bug-detector, issue-reviewer, bug-fixer)
 - **Never just describe** what should happen - actually invoke the agents
 - **Ask for permission** before issue-reviewer and bug-fixer (but NOT before bug-detector)
 - **Show progress** at each step
 - **Report summaries** after each agent completes
-- If user says "scan" without "/issuetracker" prefix, treat it as "/issuetracker scan"
+
+## Command Examples
+
+```bash
+# Full scan (default)
+/issuetracker
+/issuetracker scan
+
+# Fix specific issue
+/issuetracker fix 456
+
+# Check status
+/issuetracker status
+```
 
 **Example**:
 ```bash
