@@ -18,8 +18,37 @@ description: Complete workflow for detecting, reviewing, and fixing bugs across 
    ```
    Task tool with:
    - subagent_type: "general-purpose"
-   - description: "Scan for bugs and create issues"
-   - prompt: "THINK HARDER: Use the bug-detector agent to deeply analyze and scan for all errors in this project. Take time to thoroughly investigate code patterns, logical errors, performance issues, and subtle bugs that simple scanning might miss. Create GitHub issues for each error found. Report how many issues were created."
+   - description: "Deep bug analysis and detection"
+   - prompt: "THINK HARDER - Deep Bug Analysis Mode:
+
+You are now operating in extended thinking mode. Take your time to thoroughly investigate this codebase.
+
+Your mission:
+1. Read and understand the bug-detector agent definition (AGENT.md)
+2. Execute ALL detection categories (14 categories, 100+ bug types):
+   - Core: build, lint, type, security
+   - Extended: performance, code quality, testing, accessibility, documentation, best practices, dependencies, database, git, configuration
+3. For EACH error found:
+   - Analyze root cause deeply
+   - Understand file context and relationships
+   - Identify patterns and anti-patterns
+   - Consider edge cases and potential side effects
+   - Read related code to understand impact
+4. Create detailed GitHub issues with:
+   - Clear title and description
+   - Root cause analysis
+   - File path and line numbers
+   - Suggested fix with reasoning
+   - Priority and severity labels
+5. Work in batch mode (no confirmations, create all issues automatically)
+
+Report final summary:
+- Total errors found (by category)
+- Issues created (with numbers)
+- Issues skipped (duplicates)
+- Recommendations for manual review
+
+Take as much time as needed for thorough analysis. Quality over speed."
    ```
 
 2. **After bug-detector completes**, check the output:
