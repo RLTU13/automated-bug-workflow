@@ -732,6 +732,412 @@ grep -rn --include="*.{ts,js,go,py,rs,php,swift}" \
 - Best practice violations
 - Low-impact vulnerabilities
 
+## Extended Bug Detection Categories
+
+### 1. Performance Issues Detection
+
+**Commands**:
+```bash
+# Bundle size analysis (JavaScript/TypeScript)
+npx webpack-bundle-analyzer stats.json --mode static 2>&1 | tee bundle-analysis.log
+npm run build -- --stats 2>&1 | grep -E "large|size exceeded"
+
+# Memory profiling indicators
+grep -rn --include="*.{js,ts,py,go}" -E "(new Array\([0-9]{6,}\)|\.repeat\([0-9]{4,}\))" .
+
+# N+1 query detection (common ORMs)
+grep -rn --include="*.{js,ts,py,rb,php}" -E "(for.*\.(find|get|query)|forEach.*\.(find|get))" .
+
+# Large file operations
+grep -rn --include="*.{js,ts,py,go}" -E "(readFileSync|read_file.*entire|File\.ReadAllText)" .
+```
+
+**Patterns**:
+- `size limit.*exceeded` - Bundle size too large
+- `entrypoint size limit` - Entry point too large
+- `asset size limit` - Asset size exceeded
+- `for.*\.(find|get)` - Potential N+1 query
+- `readFileSync` - Synchronous file read (blocking)
+- `\.repeat\([0-9]{4,}\)` - Large string operations
+
+**Performance Issue Types**:
+- Bundle size > 500KB
+- N+1 database queries
+- Synchronous file I/O in async context
+- Memory leaks (unclosed connections)
+- Inefficient algorithms (nested loops with DB calls)
+- Large data loading without pagination
+
+### 2. Code Quality Issues Detection
+
+**Commands**:
+```bash
+# Cyclomatic complexity
+npx complexity-report --format json src/ 2>&1 | tee complexity.log
+
+# Code duplication
+npx jscpd --min-lines 10 --min-tokens 50 src/ 2>&1 | tee duplication.log
+
+# Function length analysis
+grep -rn --include="*.{js,ts}" "function\|const.*=.*(" . | \
+  while read line; do
+    file=$(echo $line | cut -d: -f1)
+    linenum=$(echo $line | cut -d: -f2)
+    # Count lines until next function or closing brace
+  done
+
+# Deep nesting detection
+grep -rn --include="*.{js,ts,py,go}" -E "^( {8,}|\t{3,})(if|for|while)" .
+
+# Magic numbers
+grep -rn --include="*.{js,ts,py,go}" -E "[^a-zA-Z_](100|1000|3600|86400|[2-9][0-9]{2,})[^0-9]" .
+```
+
+**Patterns**:
+- `cyclomatic complexity: [2-9][0-9]` - High complexity (>20)
+- `duplicated lines: [3-9][0-9]%` - High duplication
+- `function length: [1-9][0-9]{2,} lines` - Long functions (>50 lines)
+- `nesting depth: [4-9]` - Deep nesting (>3 levels)
+- Magic numbers without const/enum
+
+**Code Quality Metrics**:
+- Cyclomatic complexity > 10
+- Code duplication > 5%
+- Functions > 50 lines
+- Nesting depth > 3
+- Missing error handling
+- Inconsistent naming conventions
+
+### 3. Testing Issues Detection
+
+**Commands**:
+```bash
+# Test coverage analysis
+npm run test:coverage 2>&1 | tee coverage.log
+pytest --cov=. --cov-report=term 2>&1 | tee pytest-coverage.log
+go test -coverprofile=coverage.out ./... 2>&1 | tee go-coverage.log
+
+# Flaky test detection
+npm test -- --repeat=5 2>&1 | grep -E "FAIL|PASS" | sort | uniq -c
+
+# Slow test detection
+npm test -- --verbose 2>&1 | grep -E "SLOW|[0-9]{4,}ms"
+
+# Missing test files
+find src -name "*.ts" -o -name "*.js" | while read file; do
+  testfile="${file//.ts/.test.ts}"
+  testfile="${testfile//.js/.test.js}"
+  testfile="${testfile//src/test}"
+  [[ ! -f "$testfile" ]] && echo "Missing test: $testfile for $file"
+done
+```
+
+**Patterns**:
+- `All files.*[0-9]{1,2}\.[0-9]{1,2}%` - Low coverage (<80%)
+- `FAIL.*PASS.*FAIL` - Flaky test
+- `SLOW.*[0-9]{4,}ms` - Slow test (>1s)
+- `Missing test:` - No test file for source file
+
+**Testing Issue Types**:
+- Coverage < 80%
+- Flaky tests (inconsistent results)
+- Slow tests (>1 second)
+- Missing tests for critical paths
+- No edge case tests
+- Outdated snapshot tests
+
+### 4. Accessibility Issues Detection
+
+**Commands**:
+```bash
+# Missing alt text
+grep -rn --include="*.{jsx,tsx,html,vue}" "<img" . | grep -v "alt="
+
+# Missing ARIA labels
+grep -rn --include="*.{jsx,tsx,html,vue}" -E "(button|input|select)" . | grep -v "aria-label"
+
+# Color contrast (requires axe-core)
+npx axe --dir=./build --tags wcag2aa 2>&1 | tee axe-report.log
+
+# Keyboard navigation
+grep -rn --include="*.{jsx,tsx}" "onClick" . | grep -v "onKeyDown"
+
+# Form accessibility
+grep -rn --include="*.{jsx,tsx,html}" "<input" . | grep -v "id=" | grep -v "aria-"
+```
+
+**Patterns**:
+- `<img.*>(?!.*alt=)` - Missing alt text
+- `<button.*onClick.*>(?!.*onKeyDown)` - No keyboard handler
+- `<input(?!.*id=)` - Input without ID
+- `color-contrast.*FAIL` - Color contrast too low
+- `missing-aria-label` - Missing ARIA label
+
+**Accessibility Issue Types**:
+- Missing alt text on images
+- Missing ARIA labels
+- Color contrast < 4.5:1
+- No keyboard navigation
+- Missing form labels
+- Improper heading hierarchy
+
+### 5. Documentation Issues Detection
+
+**Commands**:
+```bash
+# Missing JSDoc/docstrings
+grep -rn --include="*.{js,ts}" "^export (function|class|const)" . | \
+  while read line; do
+    linenum=$(echo $line | cut -d: -f2)
+    file=$(echo $line | cut -d: -f1)
+    # Check if previous line has /** comment
+    prevline=$((linenum - 1))
+    if ! sed -n "${prevline}p" "$file" | grep -q "/\*\*"; then
+      echo "Missing JSDoc: $file:$linenum"
+    fi
+  done
+
+# Missing function documentation (Python)
+grep -rn --include="*.py" "^def " . | \
+  while read line; do
+    # Check for docstring
+    linenum=$(echo $line | cut -d: -f2)
+    file=$(echo $line | cut -d: -f1)
+    nextline=$((linenum + 1))
+    if ! sed -n "${nextline}p" "$file" | grep -q '"""'; then
+      echo "Missing docstring: $file:$linenum"
+    fi
+  done
+
+# Outdated README
+if [[ -f README.md ]]; then
+  readme_age=$(( ($(date +%s) - $(stat -f %m README.md)) / 86400 ))
+  if [[ $readme_age -gt 180 ]]; then
+    echo "README not updated in $readme_age days"
+  fi
+fi
+
+# TODO/FIXME comments
+grep -rn --include="*.{js,ts,py,go,rs,php,rb}" -E "(TODO|FIXME|HACK|XXX)" .
+
+# Missing API documentation
+grep -rn --include="*.{js,ts}" "app\.(get|post|put|delete)" . | \
+  grep -v "@api\|/\*\*"
+```
+
+**Patterns**:
+- `Missing JSDoc:` - Public function without docs
+- `Missing docstring:` - Python function without docstring
+- `README not updated in [0-9]{3,} days` - Outdated README
+- `TODO:` - Unresolved TODO items
+- `FIXME:` - Known issues not fixed
+- API route without documentation
+
+**Documentation Issue Types**:
+- Missing JSDoc/docstrings on public APIs
+- Outdated README (>6 months)
+- Unresolved TODO/FIXME comments
+- Missing API documentation
+- No inline comments for complex logic
+- Missing changelog entries
+
+### 6. Best Practice Violations Detection
+
+**Commands**:
+```bash
+# Console.log in production
+grep -rn --include="*.{js,ts}" "console\.(log|debug|info)" src/
+
+# Hardcoded URLs
+grep -rn --include="*.{js,ts,py,go}" -E "https?://[a-zA-Z0-9]" . | grep -v "example.com"
+
+# Process.env access (should use config)
+grep -rn --include="*.{js,ts}" "process\.env\." src/ | grep -v "config"
+
+# Direct DOM manipulation in React
+grep -rn --include="*.{jsx,tsx}" "document\.querySelector\|getElementById" .
+
+# Missing error handling
+grep -rn --include="*.{js,ts}" "async.*{" . | \
+  while read line; do
+    # Check if try-catch exists in function
+  done
+
+# Inconsistent naming
+find . -name "*.{js,ts}" | while read file; do
+  # Check for mix of camelCase and snake_case
+  if grep -q "[a-z]_[a-z]" "$file" && grep -q "[a-z][A-Z]" "$file"; then
+    echo "Mixed naming convention: $file"
+  fi
+done
+```
+
+**Patterns**:
+- `console\.(log|debug)` - Console statements in production
+- `https?://(?!example\.com)` - Hardcoded URLs
+- `process\.env\.` - Direct env access (use config)
+- `document\.querySelector` - Direct DOM manipulation in React
+- `async.*{(?!.*try)` - Async without try-catch
+- Mixed naming conventions (camelCase + snake_case)
+
+**Best Practice Violation Types**:
+- Console.log in production code
+- Hardcoded URLs/endpoints
+- Direct environment variable access
+- Missing error boundaries (React)
+- No error handling for async operations
+- Inconsistent naming conventions
+- Commented-out code blocks
+- Magic strings (should be constants)
+
+### 7. Dependency Issues Detection
+
+**Commands**:
+```bash
+# Outdated dependencies
+npm outdated --json 2>&1 | tee outdated.log
+pip list --outdated 2>&1 | tee pip-outdated.log
+cargo outdated 2>&1 | tee cargo-outdated.log
+
+# Unused dependencies
+npx depcheck 2>&1 | tee depcheck.log
+pip-autoremove --list 2>&1 | tee pip-autoremove.log
+
+# License compatibility
+npx license-checker --summary 2>&1 | tee licenses.log
+
+# Dependency size
+npm ls --prod --json | jq '.dependencies | length'
+du -sh node_modules/ 2>&1
+```
+
+**Patterns**:
+- `Package.*Current:.*Wanted:.*Latest:` - Outdated package
+- `Unused dependencies:` - Dependencies not used
+- `GPL.*AGPL` - Restrictive licenses
+- `node_modules.*[0-9]{3,}M` - Large dependencies
+
+**Dependency Issue Types**:
+- Outdated major versions
+- Unused dependencies
+- Conflicting dependency versions
+- License compatibility issues
+- Large dependency tree
+- Deprecated packages
+
+### 8. Database/Data Issues Detection
+
+**Commands**:
+```bash
+# Missing indexes (Rails migrations)
+grep -rn --include="*.rb" "add_column\|create_table" db/migrate/ | \
+  grep -v "index:"
+
+# N+1 queries (logs)
+if [[ -f log/development.log ]]; then
+  grep -n "SELECT.*FROM" log/development.log | \
+    awk '{print $NF}' | sort | uniq -c | sort -rn | head -20
+fi
+
+# Missing foreign key constraints
+grep -rn --include="*.sql" "REFERENCES" . | \
+  grep -v "FOREIGN KEY"
+
+# SQL injection risks
+grep -rn --include="*.{js,py,php,rb}" -E "execute\(.*\+|query\(.*\+|raw\(.*\%" .
+```
+
+**Patterns**:
+- `add_column(?!.*index)` - Column without index
+- `SELECT.*FROM.*: [0-9]{2,}` - Repeated queries (N+1)
+- `REFERENCES(?!.*FOREIGN KEY)` - Missing FK constraint
+- `execute\(.*\+\)` - SQL concatenation (injection risk)
+
+**Database Issue Types**:
+- Missing database indexes
+- N+1 queries
+- Missing foreign key constraints
+- SQL injection vulnerabilities
+- Missing database migrations
+- Large query result sets without pagination
+
+### 9. Git/Version Control Issues Detection
+
+**Commands**:
+```bash
+# Large files in git
+git ls-files | xargs du -h | sort -rh | head -20
+
+# Sensitive files committed
+git log --all --full-history -- "*.env" "*.pem" "*.key"
+
+# Merge conflicts markers
+grep -rn --include="*.{js,ts,py,go}" -E "^(<{7}|>{7}|={7})" .
+
+# Uncommitted changes
+git status --porcelain | grep "^??"
+
+# Large commits
+git log --all --pretty=format:"%h %s" --shortstat | \
+  grep "files? changed" | \
+  awk '$4 > 100 {print}'
+```
+
+**Patterns**:
+- Files > 10MB in git
+- `.env` or `.key` files in history
+- `^<{7}|^>{7}` - Merge conflict markers
+- `^??.*\.env` - Uncommitted sensitive files
+- Commits changing >100 files
+
+**Version Control Issue Types**:
+- Large files in repository (>10MB)
+- Sensitive files in git history
+- Unresolved merge conflicts
+- Uncommitted changes to critical files
+- No .gitignore file
+- Commits without proper messages
+
+### 10. Configuration Issues Detection
+
+**Commands**:
+```bash
+# Missing environment variables
+grep -rn "process\.env\." src/ | \
+  sed 's/.*process\.env\.\([A-Z_]*\).*/\1/' | \
+  sort -u | while read var; do
+    if ! grep -q "^$var=" .env.example 2>/dev/null; then
+      echo "Missing from .env.example: $var"
+    fi
+  done
+
+# Insecure configuration
+grep -rn --include="*.{json,yaml,yml}" "debug.*true\|ssl.*false" .
+
+# Missing health checks
+if [[ ! $(grep -r "health\|ping" . --include="*.{js,ts,go,py}") ]]; then
+  echo "No health check endpoint found"
+fi
+
+# Cors misconfiguration
+grep -rn --include="*.{js,ts}" "cors.*\*\|origin.*\*" .
+```
+
+**Patterns**:
+- `Missing from .env.example:` - Env var not documented
+- `debug.*true` - Debug mode enabled
+- `ssl.*false` - SSL disabled
+- `cors.*origin.*\*` - CORS wildcard (insecure)
+- No health check endpoint
+
+**Configuration Issue Types**:
+- Missing .env.example
+- Debug mode in production
+- Insecure CORS settings
+- Missing health check endpoints
+- Hardcoded credentials in config
+- No rate limiting configured
+
 ## Workflow
 
 ### 1. Language Detection Phase
