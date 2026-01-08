@@ -17,38 +17,9 @@ description: Complete workflow for detecting, reviewing, and fixing bugs across 
 1. **Immediately** use the Task tool to invoke the bug-detector agent:
    ```
    Task tool with:
-   - subagent_type: "general-purpose"
-   - description: "Deep bug analysis and detection"
-   - prompt: "THINK HARDER - Deep Bug Analysis Mode:
-
-You are now operating in extended thinking mode. Take your time to thoroughly investigate this codebase.
-
-Your mission:
-1. Read and understand the bug-detector agent definition (AGENT.md)
-2. Execute ALL detection categories (14 categories, 100+ bug types):
-   - Core: build, lint, type, security
-   - Extended: performance, code quality, testing, accessibility, documentation, best practices, dependencies, database, git, configuration
-3. For EACH error found:
-   - Analyze root cause deeply
-   - Understand file context and relationships
-   - Identify patterns and anti-patterns
-   - Consider edge cases and potential side effects
-   - Read related code to understand impact
-4. Create detailed GitHub issues with:
-   - Clear title and description
-   - Root cause analysis
-   - File path and line numbers
-   - Suggested fix with reasoning
-   - Priority and severity labels
-5. Work in batch mode (no confirmations, create all issues automatically)
-
-Report final summary:
-- Total errors found (by category)
-- Issues created (with numbers)
-- Issues skipped (duplicates)
-- Recommendations for manual review
-
-Take as much time as needed for thorough analysis. Quality over speed."
+   - subagent_type: "bug-detector"
+   - description: "Scan for bugs and create issues"
+   - prompt: "Run full scan on this project. Create GitHub issues for all errors found."
    ```
 
 2. **After bug-detector completes**, check the output:
@@ -64,27 +35,9 @@ Take as much time as needed for thorough analysis. Quality over speed."
 4. **Immediately** use the Task tool to invoke issue-reviewer agent:
    ```
    Task tool with:
-   - subagent_type: "general-purpose"
+   - subagent_type: "issue-reviewer"
    - description: "Review auto-detected issues"
-   - prompt: "THINK HARDER - Issue Review Mode:
-
-Use the issue-reviewer agent to review all issues with label 'auto-detected'.
-
-For each issue:
-1. Read the issue details and file context
-2. Determine complexity (simple vs complex)
-3. Check if auto-fix eligible (ONLY unused imports/variables)
-4. Add appropriate labels:
-   - 'auto-fix-eligible' for simple unused code
-   - 'needs-manual-review' for everything else
-5. Add priority labels (critical/high/medium/low)
-
-CRITICAL: After reviewing ALL issues, you MUST report:
-- Total issues reviewed: X
-- Auto-fix eligible: Y (list issue numbers)
-- Needs manual review: Z (list issue numbers)
-
-THEN IMMEDIATELY continue to bug-fixer if Y > 0. Do NOT stop or ask for permission."
+   - prompt: "Review all issues with label 'auto-detected'. Add appropriate labels and report auto-fix eligible count."
    ```
 
 5. **After issue-reviewer completes**, check the output:
@@ -94,26 +47,9 @@ THEN IMMEDIATELY continue to bug-fixer if Y > 0. Do NOT stop or ask for permissi
 6. **Immediately** use the Task tool to invoke bug-fixer agent:
    ```
    Task tool with:
-   - subagent_type: "general-purpose"
+   - subagent_type: "bug-fixer"
    - description: "Auto-fix eligible issues"
-   - prompt: "THINK HARDER - Bug Fix Mode:
-
-Use the bug-fixer agent to fix all issues with label 'auto-fix-eligible'.
-
-For each issue:
-1. Read the issue details and affected file
-2. Understand the error context
-3. Apply the fix (remove unused import/variable)
-4. Verify fix doesn't break anything
-5. Create a PR with clear description
-6. Close the original issue with reference to PR
-
-CRITICAL: After fixing ALL eligible issues, you MUST:
-- Report how many PRs were created
-- Report how many issues were closed
-- List all PR numbers and their corresponding issue numbers
-
-Do NOT stop until all auto-fix-eligible issues are processed."
+   - prompt: "Fix all issues with label 'auto-fix-eligible'. Create PRs and close issues."
    ```
 
 7. **Report final summary**:
@@ -137,9 +73,9 @@ Do NOT stop until all auto-fix-eligible issues are processed."
 2. **Immediately** use the Task tool to invoke issue-reviewer:
    ```
    Task tool with:
-   - subagent_type: "general-purpose"
+   - subagent_type: "issue-reviewer"
    - description: "Review single issue"
-   - prompt: "Use issue-reviewer agent to review issue #{issue-number} and determine if it's auto-fix eligible."
+   - prompt: "Review issue #{issue-number} and determine if it's auto-fix eligible."
    ```
 
 3. **After review**, check if auto-fix eligible:
@@ -155,9 +91,9 @@ Do NOT stop until all auto-fix-eligible issues are processed."
 5. **Immediately** use the Task tool to invoke bug-fixer:
    ```
    Task tool with:
-   - subagent_type: "general-purpose"
+   - subagent_type: "bug-fixer"
    - description: "Fix single issue"
-   - prompt: "Use bug-fixer agent to fix issue #{issue-number}, create a PR, and trigger QA review."
+   - prompt: "Fix issue #{issue-number}, create a PR, and close the issue."
    ```
 
 6. **Report result**:
